@@ -10,3 +10,4 @@ if (isChrome) {
   // You can handle this case differently based on your requirements
   alert("Please open this link in Chrome.");
 }
+
