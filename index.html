@@ -1,12 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Testing</title>
-  </head>
-  <body>
-    <h1>hello is sample push</h1>
-  </body>
-  <script src="app.js"></script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MicroPython Code Generator Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chatbot-container {
+      width: 400px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      background-color: #007bff;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      border-bottom: 1px solid #ddd;
+      background-color: #f9f9f9;
+    }
+
+    .message {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      max-width: 80%;
+    }
+
+    .message.user {
+      background-color: #007bff;
+      color: white;
+      align-self: flex-end;
+    }
+
+    .message.bot {
+      background-color: #e1e1e1;
+      color: #333;
+      align-self: flex-start;
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 10px;
+      background-color: #fff;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+
+    .chat-input button {
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .chat-input button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="chatbot-container">
+    <div class="chat-header">MicroPython Code Generator</div>
+    <div class="chat-messages" id="chat-messages">
+      <!-- Chat messages will appear here -->
+    </div>
+    <div class="chat-input">
+      <input type="text" id="user-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const apiKey = 'sk-cc6bc090e8c542f0acccffd7e1496bc1'; // Replace with your DeepSeek API key
+    const apiUrl = 'https://api.deepseek.com/v1/chat'; // Replace with the actual API endpoint
+
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+
+    // Function to add a message to the chat
+    function addMessage(text, sender) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message', sender);
+      messageDiv.textContent = text;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll to the latest message
+    }
+
+    // Function to send a message to the API
+    async function sendMessage() {
+      const userMessage = userInput.value.trim();
+      if (!userMessage) return;
+
+      addMessage(userMessage, 'user'); // Display user's message
+      userInput.value = ''; // Clear the input field
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: `Generate MicroPython code for: ${userMessage}`,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        const botMessage = data.message || 'No response from the bot.';
+        addMessage(botMessage, 'bot'); // Display bot's response
+      } catch (error) {
+        console.error('Error:', error);
+        addMessage('Failed to send message. Please try again.', 'bot');
+      }
+    }
+
+    // Handle Enter key press
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+  </script>
+</body>
 </html>
